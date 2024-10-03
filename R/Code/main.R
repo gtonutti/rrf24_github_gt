@@ -18,17 +18,17 @@ library(RColorBrewer) # color palettes
 
 #new users need to restore enviornment by running:
 #you only need to run it the firt time you interact with the package
-renv::restore()
+#renv::restore()
 
 # Set data path ----
 
 # this is the second root of the project, the first root is the code whose directory 
 # is already being handled by the rstudio project.
 
-data_path <- "C:\Users\wb589699\OneDrive - WBG\Desktop\RRF2024\Data"
+data_path <- "C:/Users/wb589699/OneDrive - WBG/Desktop/RRF2024/Data"
 
 # Run the R scripts ----
 
-source("Code\01-processining-data.R")
-source("Code\02-constructing-data.R")
-source("Code\03-analyzing-data.R")
+source("Code/01-processing-data.R")
+source("Code/02-constructing-data.R")
+source("Code/03-analyzing-data.R")
