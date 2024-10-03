@@ -11,7 +11,6 @@ library(tidyr)
 
 # Load data 
 #household level data
-data_path <- "C:/Users/wb589699/OneDrive - WBG/Desktop/RRF2024/Data"
 
 hh_data   <- read_dta(file.path(data_path, "Final/TZA_CCT_analysis.dta"))
 

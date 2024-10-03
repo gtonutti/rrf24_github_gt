@@ -11,7 +11,6 @@ library(labelled)
 ### Loading data ----
 
 # Load the dataset
-data_path <- "C:/Users/wb589699/OneDrive - WBG/Desktop/RRF2024/Data"
 data      <- read_dta(file.path(data_path, "Raw/TZA_CCT_baseline.dta"))
 
 ### Remove duplicates based on hhid
