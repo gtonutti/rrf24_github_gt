@@ -2,16 +2,17 @@
 # 03. Data Analysis
 
 # Libraries
-# library(haven)
-# library(dplyr)
-# library(modelsummary)
-# library(stargazer)
-# library(ggplot2)
-# library(tidyr)
+library(haven)
+library(dplyr)
+library(modelsummary)
+library(stargazer)
+library(ggplot2)
+library(tidyr)
 
 # Load data 
 #household level data
-data_path <- "ADD-YOUR-PATH"
+data_path <- "C:/Users/wb589699/OneDrive - WBG/Desktop/RRF2024/Data"
+
 hh_data   <- read_dta(file.path(data_path, "Final/TZA_CCT_analysis.dta"))
 
 # secondary data 
@@ -21,18 +22,32 @@ secondary_data <- read_dta(file.path(data_path, "Final/TZA_amenity_analysis.dta"
 # Summary statistics ----
 
 # Create summary statistics by district and export to CSV
+data_renamed<- hh_data %>%
+    select (`HH size` = hh_size,
+            `N children <= 5` = n_child_5,
+            `Food consumption (USD)`= food_cons_usd_w,
+            `Non-food consumption (USD)`= nonfood_cons_usd_w,
+            `District`=district)
+
 summary_table <- datasummary(
-    ...... ~ ...... * (Mean + SD), 
-    data = hh_data,
+    All(data_renamed)~ as.factor(District) * (Mean + SD), 
+    data = data_renamed,
     title = "Summary Statistics by District",
     output = file.path("Outputs", "summary_table.csv")  # Change to CSV
 )
 
 
 # Balance table ----
+balance_data<- hh_data %>%
+    select (`HH size` = hh_size,
+            `N children <= 5` = n_child_5,
+            `Any member can read`= read,
+            `Non-food consumption (USD)`= nonfood_cons_usd_w,
+            treatment)
+
 balance_table <- datasummary_balance(
-    ...... ~ ......,
-    data = hh_data,
+    All(balance_data) ~ treatment,
+    data = balance_data,
     stars = TRUE,
     title = "Balance by Treatment Status",
     note = "Includes HHS with observations for baseline and endline",
@@ -42,17 +57,17 @@ balance_table <- datasummary_balance(
 # Regressions ----
 
 # Model 1: Food consumption regressed on treatment
-model1 <- lm(......, data = hh_data)
+model1 <- lm(food_cons_usd_w~treatment, data = hh_data)
 
 # Model 2: Add controls (crop_damage, drought_flood)
-model2 <- lm(......, data = hh_data)
+model2 <- lm(food_cons_usd_w~treatment+crop_damage+drought_flood, data = hh_data)
 
 # Model 3: Add FE by district
-model3 <- lm(......, data = hh_data)
+model3 <- lm(food_cons_usd_w~treatment+crop_damage+drought_flood + factor(district), data = hh_data)
 
 # Create regression table using stargazer
 stargazer(
-    ......,
+    model1, model2, model3,
     title = "Food Consumption Effects",
     keep = c("treatment", "crop_damage", "drought_flood"),
     covariate.labels = c("Treatment",
@@ -77,14 +92,23 @@ hh_data_plot <- hh_data %>%
 
 # Create the bar plot
 # Create the bar plot
-ggplot(hh_data_plot, aes(......) +
-    geom_bar(......) +
-    geom_text(......) +  # Add text labels
-    facet_wrap(......) +  # Facet by district
+ggplot(hh_data_plot, aes(x = treatment, y = area_acre_w, fill = treatment)) +
+    geom_bar(stat = "summary", fun = "mean", position = "dodge") +  # Use mean for the bar height
+    geom_text(stat = "summary", fun = "mean", aes(label = round(..y.., 1)), 
+              position = position_dodge(width = 0.9), vjust = -0.5) +  # Add text labels
+    facet_wrap(~ district, nrow = 1, labeller = label_both) +  # Facet by district
     labs(title = "Area cultivated by treatment assignment across districts",
          x = NULL, y = "Average area cultivated (Acre)") +  # Remove x-axis title
     theme_minimal() +
-    ...... # Add other customization if needed
+    scale_fill_brewer(palette = "PuRd", name = "Assignment:") +
+    theme(legend.position = "bottom",
+          plot.title = element_text(hjust = 0.5, size = 14),
+          strip.text = element_text(size = 12),
+          legend.title = element_text(size = 11),
+          legend.text = element_text(size = 10),
+          axis.text.x = element_blank(),  # Remove repeated x-axis labels
+          axis.ticks.x = element_blank()) +  # Remove x-axis ticks
+    guides(fill = guide_legend(reverse = TRUE)) 
 
 ggsave(file.path("Outputs", "fig1.png"), width = 10, height = 6)
 
