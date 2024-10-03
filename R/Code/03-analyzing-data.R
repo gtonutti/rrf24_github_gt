@@ -91,7 +91,6 @@ hh_data_plot <- hh_data %>%
            district = as_factor(district))
 
 # Create the bar plot
-# Create the bar plot
 ggplot(hh_data_plot, aes(x = treatment, y = area_acre_w, fill = treatment)) +
     geom_bar(stat = "summary", fun = "mean", position = "dodge") +  # Use mean for the bar height
     geom_text(stat = "summary", fun = "mean", aes(label = round(..y.., 1)), 
@@ -127,17 +126,23 @@ mean_male <- hh_data %>%
     pull(mean)
 
 # Create the density plot
-ggplot(hh_data, 
-       aes(......)) +
-    geom_density(......) +  # Density plot
-    geom_vline(xintercept = ......, color = "purple", linetype = "dashed", size = 1) +  # Vertical line for female mean
-    geom_vline(xintercept = ......, color = "grey", linetype = "dashed", size = 1) +  # Vertical line for male mean
+ggplot(hh_data, aes(x = nonfood_cons_usd_w, color = factor(female_head))) +
+    geom_density(size = 1.2) +  # Density plot
+    geom_vline(xintercept = mean_female, color = "purple", linetype = "dashed", size = 1) +  # Vertical line for female mean
+    geom_vline(xintercept = mean_male, color = "grey", linetype = "dashed", size = 1) +  # Vertical line for male mean
     labs(title = "Distribution of Non-Food Consumption",
          x = "Non-food consumption value (USD)", 
          y = "Density",
          color = "Household Head:") +  # Custom labels
+    scale_color_manual(values = c("grey", "purple"), labels = c("Male", "Female")) +  # Custom colors
     theme_minimal() +
-    ...... # Add other customization if needed
+    theme(plot.title = element_text(hjust = 0.5, size = 16),
+          legend.position = "bottom",
+          legend.title = element_text(size = 11),
+          legend.text = element_text(size = 10)) +
+    annotate("text", x = mean_female, y = 0.015, label = paste("Mean (Female):", round(mean_female, 1)), color = "purple", hjust = -0.1) +
+    annotate("text", x = mean_male, y = 0.01, label = paste("Mean (Male):", round(mean_male, 1)), color = "grey", hjust = 1.1) +
+    annotate("text", x = 50, y = 0.022, label = "Dashed line represents the average non-food consumption", size = 3, hjust = 0)
 
 ggsave(file.path("Outputs", "fig2.png"), width = 10, height = 6)
 
@@ -151,15 +156,16 @@ long_data <- secondary_data %>%
            in_sample = if_else(district %in% c("Kibaha", "Chamwino", "Bagamoyo"), "In Sample", "Not in Sample"))
 
 # Create the facet-wrapped bar plot
-ggplot(long_data,
-       aes(......)) +
-    geom_bar(......) +
+ggplot(long_data, aes(x = reorder(district, count), y = count, fill = in_sample)) +
+    geom_bar(stat = "identity", position = "dodge", color = "black") +
     coord_flip() +
-    facet_wrap(......) +  # Create facets for schools and medical facilities
+    facet_wrap(~ amenity, scales = "free_x") +  # Create facets for schools and medical facilities
     labs(title = "Access to Amenities: By Districts",
          x = "District", y = NULL, fill = "Districts:") +
     scale_fill_brewer(palette="PuRd") +
     theme_minimal() +
-    ...... # Add other customization if needed
+    theme(plot.title = element_text(hjust = 0.5, size = 16),
+          strip.text = element_text(size = 14),  # Adjust facet labels
+          legend.position = "bottom")
 
 ggsave(file.path("Outputs", "fig3.png"), width = 10, height = 6)
