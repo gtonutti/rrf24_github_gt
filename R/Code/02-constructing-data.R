@@ -84,23 +84,23 @@ for (var in wins_var) {
 hh_mem_collapsed <- mem_data %>%
     group_by(hhid) %>%
     summarise(
-    hh_ever_sick = max(sick, na.rm = TRUE),
+    sick = max(sick, na.rm = TRUE),
 # 2. Any member can read/write.
-    hh_read = max(read, na.rm = TRUE),
+    read = max(read, na.rm = TRUE),
 # 3. Average sick days.
-    hh_avg_sick =if_else(all(is.na(days_sick)), NA_real_, mean(days_sick, na.rm = TRUE)),
+    days_sick =if_else(all(is.na(days_sick)), NA_real_, mean(days_sick, na.rm = TRUE)),
 # 4. Total treatment cost in USD.
-    hh_treat_cost =if_else(all(is.na(treat_cost)), NA_real_, sum(treat_cost, na.rm = TRUE))) %>%
+    total_treat_cost =if_else(all(is.na(treat_cost)), NA_real_, sum(treat_cost, na.rm = TRUE))) %>%
     ungroup() %>%
-    mutate(treat_cost_usd = if_else(is.na(treat_cost_usd), 
-                                    mean(treat_cost_usd, na.rm = TRUE), 
-                                    treat_cost_usd)) %>%
+    mutate(total_treat_cost = if_else(is.na(total_treat_cost), 
+                                    mean(total_treat_cost, na.rm = TRUE), 
+                                    total_treat_cost)) %>%
     # Apply labels to the variables
     set_variable_labels(
         read = "Any member can read/write",
         sick = "Any member was sick in the last 4 weeks",
         days_sick = "Average sick days",
-        treat_cost_usd = "Total cost of treatment (USD)"
+        total_treat_cost = "Total cost of treatment (USD)"
     )
 # Exercise 4.2: Data construction: Secondary data ----
 # Instructions:
@@ -114,7 +114,7 @@ secondary_data <- secondary_data %>%
 # Instructions:
 # Merge the household-level data with the HH-member level indicators.
 # After merging, ensure the treatment status is included in the final dataset.
-merged_data<- hh_data %>%
+final_hh_data<- hh_data %>%
     left_join(hh_mem_collapsed, by="hhid")
 treat_status <- read_dta(file.path(data_path, "Raw/treat_status.dta"))
 
